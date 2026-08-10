@@ -144,6 +144,69 @@ class SimpleReflexAgent:
         # ELSE: Move "Forward"
         return 'Up'
 
+class ModelBasedAgent:
+    def __init__(self):
+        # Internal memory state
+        self.visited_cells = set()
+        
+        # We don't know our global GPS coordinates, but we can track our 
+        # relative movements starting from (0,0)
+        self.rel_x = 0
+        self.rel_y = 0
+
+    def sense_and_act(self, percept):
+        
+        # 1. Update State (Transition & Sensor Model)
+        # Mark our current relative position as visited
+        self.visited_cells.add((self.rel_x, self.rel_y))
+        
+        wall_ahead = percept.get('wall_ahead', False)
+        food_here = percept.get('food_here', False)
+        
+        # 2. Condition-Action rules (Querying Memory)
+        if food_here:
+            action = 'Stay'
+        
+        elif wall_ahead:
+            unvisited_options = []
+            
+            # Check Left
+            if (self.rel_x - 1, self.rel_y) not in self.visited_cells:
+                unvisited_options.append('Left')
+            # Check Right
+            if (self.rel_x + 1, self.rel_y) not in self.visited_cells:
+                unvisited_options.append('Right')
+            # Check Down
+            if (self.rel_x, self.rel_y - 1) not in self.visited_cells:
+                unvisited_options.append('Down')
+            # Check Up
+            if (self.rel_x, self.rel_y + 1) not in self.visited_cells:
+                unvisited_options.append('Up')
+                
+            import random
+            if unvisited_options:
+                # Pick a direction we haven't been to yet
+                action = random.choice(unvisited_options)
+            else:
+                # If we've visited everywhere around us, just pick randomly to escape
+                action = random.choice(['Up', 'Down', 'Left', 'Right'])
+        else:
+            # If no wall ahead, just keep moving 'Up'
+            action = 'Up' 
+            
+        # 3. Update internal tracker for the NEXT turn
+        # We assume the action will be successful to update our relative tracker
+        if action == 'Up':
+            self.rel_y += 1
+        elif action == 'Down':
+            self.rel_y -= 1
+        elif action == 'Left':
+            self.rel_x -= 1
+        elif action == 'Right':
+            self.rel_x += 1
+            
+        return action
+
 
 class GridGameGUI:
     """Tkinter wrapper that dynamically scales cell sizes to keep larger grids on screen."""
@@ -228,13 +291,15 @@ class GridGameGUI:
     def run_loop(self):
         self.btn.config(state="disabled")
 
+        # 1. INITIALIZE THE AGENT
+        agent = ModelBasedAgent()
+
         def step():
             if not self.env.is_done():
                 # 1. Get the current local percepts
                 percept = self.env.get_percept()
 
                 # 2. Let the agent decide
-                agent = SimpleReflexAgent()
                 action = agent.sense_and_act(percept)
 
                 # 3. Execute the action
