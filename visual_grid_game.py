@@ -124,6 +124,25 @@ class VisualGridHuntGame:
 
     def is_done(self) -> bool:
         return len(self.food_positions) == 0 or self.steps >= 60 or self.collision
+        
+class SimpleReflexAgent:
+    def sense_and_act(self, percept):
+        # Read the local booleans from the environment
+        wall_ahead = percept.get('wall_ahead', False)
+        food_here = percept.get('food_here', False)
+        trap_ahead = percept.get('trap_ahead', False)
+        
+        # IF food is here, you might want to stay and collect it 
+        if food_here:
+            return 'Stay'
+            
+        # IF there is a wall ahead (or a trap), avoid it by changing direction
+        if wall_ahead or trap_ahead:
+            import random
+            return random.choice(['Up', 'Down', 'Left', 'Right'])
+            
+        # ELSE: Move "Forward"
+        return 'Up'
 
 
 class GridGameGUI:
@@ -211,7 +230,14 @@ class GridGameGUI:
 
         def step():
             if not self.env.is_done():
-                action = random.choice(['Up', 'Down', 'Left', 'Right'])
+                # 1. Get the current local percepts
+                percept = self.env.get_percept()
+
+                # 2. Let the agent decide
+                agent = SimpleReflexAgent()
+                action = agent.sense_and_act(percept)
+
+                # 3. Execute the action
                 self.env.execute_action(action)
 
                 self.draw_grid()
