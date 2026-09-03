@@ -125,3 +125,47 @@ class SearchAgent:
 
     def euclidean_distance(self, pos, goal):
         return math.sqrt((pos[0] - goal[0])**2 + (pos[1] - goal[1])**2)
+
+    def astar_search(self, start_pos, goal_pos, walls, grid_size, heuristic_type='manhattan'):
+        frontier = []
+        reached_states = set()
+        
+        g_cost = 0
+        if heuristic_type == 'manhattan':
+            h_cost = self.manhattan_distance(start_pos, goal_pos)
+        else:
+            h_cost = self.euclidean_distance(start_pos, goal_pos)
+            
+        f_cost = g_cost + h_cost
+        heapq.heappush(frontier, (f_cost, g_cost, start_pos, []))
+        
+        moves = {'Up': (0, 1), 'Down': (0, -1), 'Left': (-1, 0), 'Right': (1, 0)}
+        grid_w, grid_h = grid_size
+        
+        while frontier:
+            f_current, g_current, current_pos, path_taken = heapq.heappop(frontier)
+            
+            if current_pos == goal_pos:
+                return path_taken
+                
+            if current_pos in reached_states:
+                continue
+                
+            reached_states.add(current_pos)
+            
+            for action, (dx, dy) in moves.items():
+                nx, ny = current_pos[0] + dx, current_pos[1] + dy
+                neighbor = (nx, ny)
+                
+                if 0 <= nx < grid_w and 0 <= ny < grid_h and neighbor not in walls:
+                    if neighbor not in reached_states:
+                        g_new = g_current + 1
+                        if heuristic_type == 'manhattan':
+                            h_new = self.manhattan_distance(neighbor, goal_pos)
+                        else:
+                            h_new = self.euclidean_distance(neighbor, goal_pos)
+                        f_new = g_new + h_new
+                        
+                        heapq.heappush(frontier, (f_new, g_new, neighbor, path_taken + [action]))
+                        
+        return []
