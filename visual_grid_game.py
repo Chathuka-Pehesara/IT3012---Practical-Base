@@ -1,6 +1,7 @@
 # visual_grid_game.py
 import random
 import tkinter as tk
+from agent import SearchAgent
 
 
 class VisualGridHuntGame:
@@ -79,7 +80,8 @@ class VisualGridHuntGame:
             'remaining_food': len(self.food_positions),
             'grid_size': (self.width, self.height),
             'walls': list(self.walls),
-            'all_food': list(self.food_positions)
+            'all_food': list(self.food_positions),
+            'agent_pos': tuple(self.agent_pos)
         }
 
     def execute_action(self, action: str):
@@ -234,9 +236,19 @@ class GridGameGUI:
         self.label = tk.Label(root, text="Score: 0 | Steps: 0", font=("Arial", 14))
         self.label.pack(pady=10)
 
-        self.btn = tk.Button(root, text="Start Simulation", command=self.run_loop, font=("Arial", 12), bg="#000066",
+        control_frame = tk.Frame(root)
+        control_frame.pack(pady=5)
+
+        tk.Label(control_frame, text="Algorithm:", font=("Arial", 12)).pack(side=tk.LEFT, padx=5)
+        self.algo_var = tk.StringVar(root)
+        self.algo_var.set("BFS") 
+        algo_dropdown = tk.OptionMenu(control_frame, self.algo_var, "BFS", "DFS", "UCS")
+        algo_dropdown.config(font=("Arial", 10))
+        algo_dropdown.pack(side=tk.LEFT, padx=5)
+
+        self.btn = tk.Button(control_frame, text="Start Simulation", command=self.run_loop, font=("Arial", 12), bg="#000066",
                              fg="white")
-        self.btn.pack(pady=5)
+        self.btn.pack(side=tk.LEFT, padx=10)
 
         self.draw_grid()
 
@@ -295,7 +307,8 @@ class GridGameGUI:
         self.btn.config(state="disabled")
 
         # 1. INITIALIZE THE AGENT
-        agent = ModelBasedAgent()
+        agent = SearchAgent()
+        agent.active_algo = self.algo_var.get()
 
         def step():
             if not self.env.is_done():
