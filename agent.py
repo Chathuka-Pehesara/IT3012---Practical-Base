@@ -1,5 +1,7 @@
 from collections import deque
 import random
+import math
+
 import heapq
 
 # agent.py
@@ -108,6 +110,7 @@ class SearchAgent:
             current_cost, _, current_state, path = heapq.heappop(frontier)
             if current_state == goal_state:
                 return path
+            
             for action, successor, step_cost in get_successors(current_state):
                 new_cost = current_cost + step_cost
                 
@@ -116,6 +119,9 @@ class SearchAgent:
                     heapq.heappush(frontier, (new_cost, id(successor), successor, path + [action]))
                     
         return []
-            
 
+    def manhattan_distance(self, pos, goal):
+        return abs(pos[0] - goal[0]) + abs(pos[1] - goal[1])
 
+    def euclidean_distance(self, pos, goal):
+        return math.sqrt((pos[0] - goal[0])**2 + (pos[1] - goal[1])**2)
