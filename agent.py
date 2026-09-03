@@ -61,6 +61,10 @@ class SearchAgent:
             elif self.active_algo == 'UCS':
                 def cost_function(s, a, s_next): return 1
                 self.plan = self.ucs_search(agent_pos, closest_food, get_successors, cost_function)
+            elif self.active_algo == 'AStar':
+                grid_size = percept.get('grid_size', (10, 10))
+                walls = set(percept.get('walls', []))
+                self.plan = self.astar_search(agent_pos, closest_food, walls, grid_size, 'manhattan')
                 
         # Return the first action from the plan
         if self.plan:

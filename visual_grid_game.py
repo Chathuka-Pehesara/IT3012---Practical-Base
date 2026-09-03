@@ -242,7 +242,7 @@ class GridGameGUI:
         tk.Label(control_frame, text="Algorithm:", font=("Arial", 12)).pack(side=tk.LEFT, padx=5)
         self.algo_var = tk.StringVar(root)
         self.algo_var.set("BFS") 
-        algo_dropdown = tk.OptionMenu(control_frame, self.algo_var, "BFS", "DFS", "UCS")
+        algo_dropdown = tk.OptionMenu(control_frame, self.algo_var, "BFS", "DFS", "UCS", "AStar")
         algo_dropdown.config(font=("Arial", 10))
         algo_dropdown.pack(side=tk.LEFT, padx=5)
 
