@@ -167,6 +167,20 @@ class SearchAgent:
                 
                 if 0 <= nx < grid_w and 0 <= ny < grid_h and neighbor not in walls:
                     if neighbor not in reached_states:
+                        
+                        # --- Knowledge Base Consultation ---
+                        self.kb.clear_facts()
+                        # Mock percepts for the specific tile
+                        self.kb.tell_fact("TargetVisible")
+                        self.kb.tell_fact("HasDust")
+                        self.kb.tell_fact("BloodseekerMissing")
+                        
+                        self.kb.forward_chain()
+                        
+                        if "Retreat" in self.kb.facts:
+                            continue # Skip this tile, it's Infeasible
+                        # -----------------------------------
+                        
                         g_new = g_current + 1
                         if heuristic_type == 'manhattan':
                             h_new = self.manhattan_distance(neighbor, goal_pos)
