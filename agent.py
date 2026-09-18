@@ -1,8 +1,8 @@
 from collections import deque
 import random
 import math
-
 import heapq
+from logic_engine import KnowledgeBase
 
 # agent.py
 class GreedyGridAgent:
@@ -23,6 +23,10 @@ class SearchAgent:
         self.actions_pool = ['Up', 'Down', 'Left', 'Right']
         self.plan = []
         self.active_algo = 'BFS'
+        
+        self.kb = KnowledgeBase()
+        self.kb.tell_rule(["TargetVisible", "HasDust"], "SafeToEngage")
+        self.kb.tell_rule(["SafeToEngage", "BloodseekerMissing"], "Retreat")
         
     def sense_and_act(self, percept: dict) -> str:
         if not self.plan:
